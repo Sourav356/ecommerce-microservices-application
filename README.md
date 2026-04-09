@@ -52,15 +52,76 @@ graph TD
     Order -.-> DB
 ```
 
-### 💡 The Orchestrator Flow (Checkout)
-When a user clicks "Checkout", the React frontend calls the `Order Service`. The Order Service then synchronously coordinates the transaction:
-1. Fetches the User's cart payload from the `Cart Service`.
-2. Fetches current pricing from the `Product Service`.
-3. Computes the final total and saves a `PENDING` state to the DB.
-4. Triggers the `Payment Service` to authorize the charge.
-5. Informs the `Notification Service` to simulate sending an email.
-6. Instructs the `Cart Service` to explicitly delete the items from the basket. 
-7. Upgrades the order to `COMPLETED`.
+### 🔄 Request Orchestration Flow
+To see how the "requests move" during a checkout, follow this sequence trace:
+
+```mermaid
+sequenceDiagram
+    participant C as 💻 Frontend
+    participant G as 🚪 Gateway
+    participant O as 🧾 Order Service
+    participant CA as 🛒 Cart Service
+    participant P as 💳 Payment Service
+    participant N as 📧 Notification
+    
+    C->>G: POST /api/orders/checkout
+    G->>O: Forward Request
+    Note over O: Start Orchestration
+    O->>G: GET /api/cart
+    G->>CA: Fetch Cart Data
+    CA-->>G: Cart Items []
+    G-->>O: Return Items
+    O->>G: POST /api/payments/process
+    G->>P: Authorize Charge
+    P-->>G: Transaction: SUCCESS
+    G-->>O: Payment Confirmed
+    O->>G: POST /api/notifications/send
+    G->>N: Dispatch Receipt
+    N-->>G: OK
+    O->>G: DELETE /api/cart
+    G->>CA: Flush User Cart
+    O-->>G: 200 OK (Order Finalized)
+    G-->>C: Success Toast!
+```
+
+---
+
+## ⚙️ Configuration (.env)
+
+The application is now fully parameterized for Docker and EKS. Each service folder contains a `.env` file for local overrides. Use the **`.env.example`** at the project root as a template.
+
+---
+
+## 🚀 Installation & Startup
+
+Before running the services, you must install dependencies for each environment.
+
+### 1. Unified Gateway & Frontend (Node.js)
+```bash
+cd api-gateway && npm install && npm start
+cd frontend && npm install && npm run dev
+```
+
+### 2. Python Services (Product & Notification)
+```bash
+# It is recommended to use a virtualenv
+cd product-service && pip install -r requirements.txt && python main.py
+cd notification-service && pip install -r requirements.txt && python main.py
+```
+
+### 3. Go Services (Cart & Payment)
+```bash
+# Go modules will automatically download, but you can run:
+cd cart-service && go mod tidy && go run .
+cd payment-service && go mod tidy && go run .
+```
+
+### 4. Java Services (User & Order)
+```bash
+# Maven wrapper handles everything including dependency fetch
+cd user-service && ./mvnw spring-boot:run
+cd order-service && ./mvnw spring-boot:run
+```
 
 ---
 
@@ -77,40 +138,3 @@ When a user clicks "Checkout", the React frontend calls the `Order Service`. The
 | **Inventory Service** | Node.js / Express | `4005` | Validates stock before order. |
 | **Payment Service** | Go / `net/http` | `4007` | Simulates mock payment gateway transactions. |
 | **Notification Service** | Python / FastAPI | `4008` | Mocks outgoing email / SMS dispatches. |
-
----
-
-## 🚀 Getting Started Locally
-
-Because this project is configured for later DevOps containerization, each service currently runs as a separate local process connected to a shared PostgreSQL database.
-
-### Prerequisites
-- Java 17+, Python 3.10+, Go 1.21+, Node 18+
-- PostgreSQL running locally on `localhost:5432` with a database named `ecommerce`. 
-
-### Running the Environment
-You must open separate terminal tabs for each service and start them sequentially.
-
-**1. Start the API Gateway & Frontend:**
-```bash
-cd api-gateway && npm start
-cd frontend && npm run dev
-```
-
-**2. Start Python Services:**
-```bash
-cd product-service && python main.py
-cd notification-service && python main.py
-```
-
-**3. Start Go Services:**
-```bash
-cd cart-service && go run .
-cd payment-service && go run main.go
-```
-
-**4. Start Java Services:**
-```bash
-cd user-service && ./mvnw spring-boot:run
-cd order-service && ./mvnw spring-boot:run
-```
