@@ -68,6 +68,21 @@ public class OrderController {
                 }
             }
 
+            // 2.5 Verify and Reduce Inventory Stock
+            for (Object itemObj : cartItems) {
+                Map<String, Object> cartItem = (Map<String, Object>) itemObj;
+                Map<String, Object> inventoryReq = new HashMap<>();
+                inventoryReq.put("product_id", ((Number) cartItem.get("product_id")).intValue());
+                inventoryReq.put("quantity", ((Number) cartItem.get("quantity")).intValue());
+                
+                try {
+                    restTemplate.postForEntity(GATEWAY_URL + "/inventory/reduce", inventoryReq, Map.class);
+                } catch (Exception e) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Inventory Check Failed: Insufficient stock for Product ID " + inventoryReq.get("product_id"));
+                }
+            }
+
             // 3. Save Pending Order
             Order order = new Order();
             // Storing user by username hash or mock userId. We'll set mock userId=999 since our entity requires Long.

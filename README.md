@@ -71,6 +71,8 @@ sequenceDiagram
     G->>CA: Fetch Cart Data
     CA-->>G: Cart Items []
     G-->>O: Return Items
+    O->>G: POST /api/inventory/reduce
+    G->>CA: Update Stock Levels
     O->>G: POST /api/payments/process
     G->>P: Authorize Charge
     P-->>G: Transaction: SUCCESS
