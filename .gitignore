@@ -46,8 +46,7 @@ yarn-error.log*
 **/*.out
 **/vendor/
 
-# IDE / OS
-.DS_Store
+# IDE / OS / Project Artifacts
 .idea/
 .vscode/
 *.swp
@@ -55,3 +54,6 @@ yarn-error.log*
 .DS_Store
 .AppleDouble
 .LSOverride
+# Explicitly ignoring gemini auto-generated scratchpad
+scratch/
+.gemini/

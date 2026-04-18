@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import "./index.css";
+import AdminPanel from './AdminPanel';
 
 // In production Docker, this might be a relative path or a specific domain
-const API = window._env_?.API_URL || 'http://localhost:4000/api';
+const API = '/api';
 
 function App() {
   // Global State
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('eco-user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [products, setProducts] = useState([]);
+  const [inventory, setInventory] = useState([]);
   const [cart, setCart] = useState([]);
   
   // UI State
@@ -18,6 +23,7 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
+  const [viewMode, setViewMode] = useState('store'); // 'store' or 'admin'
   
   // Auth Form State
   const [username, setUsername] = useState('');
@@ -27,17 +33,26 @@ function App() {
   const [checkoutStep, setCheckoutStep] = useState('cart'); // 'cart' or 'address'
   const [address, setAddress] = useState({ name: '', street: '', city: '' });
 
-  // Fetch products on load
+  // Fetch products and inventory on load
+  const loadCatalog = async () => {
+    setLoading(true);
+    try {
+      const prodRes = await axios.get(`${API}/products`);
+      setProducts(prodRes.data);
+      
+      const invRes = await axios.get(`${API}/inventory`);
+      setInventory(invRes.data);
+      
+      setError(null);
+    } catch (err) {
+      setError("Failed to reach APIs. Are all services running?");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    axios.get(`${API}/products`)
-      .then(res => {
-        setProducts(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError("Failed to reach API Gateway. Are all services running?");
-        setLoading(false);
-      });
+    loadCatalog();
   }, []);
 
   // Fetch cart when user logs in
@@ -72,6 +87,7 @@ function App() {
       } else {
         const res = await axios.post(`${API}/users/login`, { username, password });
         setUser(res.data); // contains token and username
+        localStorage.setItem('eco-user', JSON.stringify(res.data));
         setShowAuthModal(false);
         setSuccessMsg(`Welcome back, ${res.data.username}!`);
         setTimeout(() => setSuccessMsg(null), 3000);
@@ -105,13 +121,13 @@ function App() {
     setSuccessMsg(null);
     setLoading(true);
     try {
-      // In a real app, we'd send the address to the order-service here.
       const res = await axios.post(`${API}/orders/checkout`, { username: user.username });
       setSuccessMsg(`🚀 ${res.data.message} (Order #${res.data.order_id}, Total: $${res.data.total_amount.toFixed(2)}) will be shipped to ${address.city}!`);
       setCart([]);
       setCheckoutStep('cart');
       setIsCartOpen(false);
       setAddress({ name: '', street: '', city: '' });
+      loadCatalog(); // Refresh global inventory stock!
     } catch (err) {
       setError("Checkout failed! Check the Order Service console logs for details.");
     } finally {
@@ -126,15 +142,24 @@ function App() {
   }).filter(item => item.title);
 
   const cartTotal = cartDetails.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  
+  const isAdmin = user && user.username === 'admin';
 
   return (
     <div style={{ padding: '40px', width: '100vw', maxWidth: '1400px', margin: '0 auto', position: 'relative' }}>
       
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-        <div>
-          <h1 className="title" style={{ fontSize: '2.5rem', margin: 0 }}>NexCommerce</h1>
-          <p style={{ color: '#cbd5e1', marginTop: '10px' }}>Global Microservices Demo</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div>
+            <h1 className="title" style={{ fontSize: '2.5rem', margin: 0, cursor: 'pointer' }} onClick={() => setViewMode('store')}>NexCommerce</h1>
+            <p style={{ color: '#cbd5e1', marginTop: '10px' }}>Global Microservices Demo</p>
+          </div>
+          {isAdmin && (
+            <button className="btn" onClick={() => setViewMode(viewMode === 'store' ? 'admin' : 'store')} style={{ background: viewMode === 'admin' ? 'var(--primary)' : 'rgba(255,255,255,0.1)', fontSize: '0.8rem', padding: '6px 12px' }}>
+              {viewMode === 'store' ? 'Go to Admin Dashboard' : 'Back to Storefront'}
+            </button>
+          )}
         </div>
         
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
@@ -144,7 +169,11 @@ function App() {
               <button className="btn" onClick={() => { setIsCartOpen(true); setCheckoutStep('cart'); }} style={{ padding: '8px 20px', background: 'rgba(255,255,255,0.1)' }}>
                 🛒 Cart ({cart.length})
               </button>
-              <button className="btn" onClick={() => setUser(null)} style={{ padding: '8px 20px', background: 'transparent', border: '1px solid #ef4444', color: '#ef4444' }}>
+              <button className="btn" onClick={() => {
+                setUser(null);
+                localStorage.removeItem('eco-user');
+                setViewMode('store');
+              }} style={{ padding: '8px 20px', background: 'transparent', border: '1px solid #ef4444', color: '#ef4444' }}>
                 Logout
               </button>
             </>
@@ -164,22 +193,46 @@ function App() {
       {successMsg && <div style={{ background: 'rgba(74, 222, 128, 0.2)', padding: '15px', borderRadius: '8px', color: '#86efac', marginBottom: '30px' }}>{successMsg}</div>}
       {error && <div style={{ background: 'rgba(239, 68, 68, 0.2)', padding: '15px', borderRadius: '8px', color: '#fca5a5', marginBottom: '30px' }}>{error}</div>}
 
-      {/* Product Grid - Always Visible */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '40px' }}>
-        {loading ? (
-          <p style={{ color: '#cbd5e1' }}>Loading catalog securely...</p>
-        ) : products.map(p => (
-          <div key={p.id} className="glass-card" style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-              <h2 style={{ marginTop: 0, color: 'white', marginBottom: '5px' }}>{p.title}</h2>
-              <span style={{ background: 'var(--primary)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem' }}>{p.category}</span>
-            </div>
-            <p style={{ color: '#94a3b8', fontSize: '1rem', flex: 1 }}>{p.description}</p>
-            <h3 style={{ color: 'var(--accent)', fontSize: '2rem', margin: '15px 0' }}>${p.price.toFixed(2)}</h3>
-            <button className="btn" onClick={() => addToCart(p.id)} style={{ marginTop: 'auto' }}>Add to Cart</button>
-          </div>
-        ))}
-      </div>
+      {/* Main Content Area */}
+      {viewMode === 'admin' && isAdmin ? (
+        <AdminPanel API={API} />
+      ) : (
+        /* Product Grid - Always Visible */
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '40px' }}>
+          {loading ? (
+            <p style={{ color: '#cbd5e1' }}>Loading catalog securely...</p>
+          ) : products.map(p => {
+             const stockObj = inventory.find(i => parseInt(i.product_id) === p.id);
+             const stockCount = stockObj ? stockObj.quantity : 0;
+             const isOutOfStock = stockCount <= 0;
+
+             return (
+              <div key={p.id} className="glass-card" style={{ width: '100%', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+                {p.image_url && <img src={p.image_url} alt={p.title} style={{ width: '100%', height: '240px', objectFit: 'cover' }} />}
+                
+                <div style={{ padding: '25px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                    <h2 style={{ marginTop: 0, color: 'white', marginBottom: '5px' }}>{p.title}</h2>
+                    <span style={{ background: 'var(--primary)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem' }}>{p.category}</span>
+                    </div>
+                    <p style={{ color: '#94a3b8', fontSize: '1rem', flex: 1 }}>{p.description}</p>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 style={{ color: 'var(--accent)', fontSize: '2rem', margin: '15px 0' }}>${p.price.toFixed(2)}</h3>
+                        <span style={{ color: isOutOfStock ? '#fca5a5' : '#86efac', fontWeight: 'bold' }}>
+                            {isOutOfStock ? 'Sold Out' : `${stockCount} In Stock`}
+                        </span>
+                    </div>
+
+                    <button className="btn" disabled={isOutOfStock} onClick={() => addToCart(p.id)} style={{ marginTop: 'auto', background: isOutOfStock ? '#475569' : 'var(--accent)', cursor: isOutOfStock ? 'not-allowed' : 'pointer' }}>
+                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                    </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Auth Modal Overlay */}
       {showAuthModal && (

@@ -24,16 +24,8 @@ const initDb = async () => {
             );
         `);
         
-        // Seed data
-        const { rows } = await pool.query(`SELECT COUNT(*) FROM inventory_schema.stock`);
-        if (parseInt(rows[0].count) === 0) {
-            await pool.query(`
-                INSERT INTO inventory_schema.stock (product_id, quantity) 
-                VALUES (1, 50), (2, 100), (3, 20)
-            `);
-            console.log('Seeded dummy inventory data into inventory_schema');
-        }
-        console.log('Inventory DB Schema initialized');
+        // 💥 Seed data removed for production flow
+        console.log('Inventory DB Schema initialized. Ready for Admin inputs.');
     } catch (err) {
         console.error('DB Initialization error', err);
     }

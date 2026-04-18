@@ -6,7 +6,7 @@ This repository contains a full-stack, DevOps-ready e-commerce platform built us
 
 ## 🏛️ Architecture Overview
 
-The system utilizes an **API Gateway Pattern** for client ingress, and an **Orchestrator Pattern** for processing distributed transactions across isolated domains.
+The system utilizes an **API Gateway Pattern** for client ingress, and an **Orchestrator Pattern** for processing distributed transactions across isolated domains. We have also added a dynamic **Admin Dashboard** natively into the React Client to allow real-time product publishing bridging across multiple microservices.
 
 ```mermaid
 graph TD
@@ -88,6 +88,20 @@ sequenceDiagram
 
 ---
 
+## 🛠️ Tech Stack & Versions
+
+This project is built using the following core technologies and versions:
+
+| Technology | Version | Used In |
+| :-- | :-- | :-- |
+| **Node.js** | `v20.x` (LTS) | API Gateway, Frontend, Inventory, Review Services |
+| **Java** | `17` (OpenJDK) | User Service, Order Service |
+| **Go** | `1.25.0` | Cart Service, Payment Service |
+| **Python** | `3.10+` | Product Service, Notification Service |
+| **PostgreSQL** | `15+` | All persistent services |
+
+---
+
 ## ⚙️ Configuration (.env)
 
 The application is now fully parameterized for Docker and EKS. Each service folder contains a `.env` file for local overrides. Use the **`.env.example`** at the project root as a template.
@@ -135,8 +149,9 @@ cd order-service && ./mvnw spring-boot:run
 | **API Gateway** | Node.js / Express | `4000` | Central ingress point. Proxies requests to internal ports. |
 | **User Service** | Java / Spring Boot | `4001` | Handles User Registration and JWT Login. |
 | **Order Service** | Java / Spring Boot | `4006` | The Orchestrator. Coordinates checkout flow. |
-| **Product Service** | Python / FastAPI | `4003` | Manages catalog items. |
+| **Product Service** | Python / FastAPI | `4003` | Manages catalog items and Admin Image inputs. |
 | **Cart Service** | Go / `net/http` | `4004` | Stores volatile cart state. |
-| **Inventory Service** | Node.js / Express | `4005` | Validates stock before order. |
+| **Inventory Service** | Node.js / Express | `4005` | Validates stock and tracks real-time inventory levels. |
 | **Payment Service** | Go / `net/http` | `4007` | Simulates mock payment gateway transactions. |
 | **Notification Service** | Python / FastAPI | `4008` | Mocks outgoing email / SMS dispatches. |
+| **Review Service** | Node.js / Express | `4002` | Handles user product ratings and comments. |

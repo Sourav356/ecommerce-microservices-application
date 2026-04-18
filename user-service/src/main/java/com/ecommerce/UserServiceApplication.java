@@ -2,6 +2,7 @@ package com.ecommerce;
 
 import com.ecommerce.model.User;
 import com.ecommerce.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,7 +18,8 @@ public class UserServiceApplication {
     }
 
     @Bean
-    public CommandLineRunner initData(UserRepository userRepository) {
+    public CommandLineRunner initData(UserRepository userRepository, 
+                                      @Value("${ADMIN_PASSWORD}") String adminPassword) {
         return args -> {
             if (userRepository.count() == 0) {
                 User user1 = new User();
@@ -29,7 +31,7 @@ public class UserServiceApplication {
                 User user2 = new User();
                 user2.setUsername("admin");
                 user2.setEmail("admin@ecommerce.com");
-                user2.setPassword("admin123");
+                user2.setPassword(adminPassword);
                 userRepository.save(user2);
                 System.out.println("Seeded dummy users into user_schema!");
             }

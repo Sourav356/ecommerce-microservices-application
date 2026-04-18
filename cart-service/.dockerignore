@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Build artifacts (IMPORTANT for Go)
+bin/
+build/
+dist/
+*.exe
+*.out
+*.test
+
+# Logs / temp
+*.log
+*.tmp
+tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# Secrets (VERY IMPORTANT)
+.env
+.env.*
+
+# Coverage / test
+coverage.out
+
+# Node (as it is present in repo)
+node_modules/

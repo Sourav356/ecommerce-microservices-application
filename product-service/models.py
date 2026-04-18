@@ -10,3 +10,4 @@ class Product(Base):
     description = Column(String)
     price = Column(Float)
     category = Column(String, index=True)
+    image_url = Column(String)
