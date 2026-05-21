@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: product-service
+  namespace: {{.Values.namespace}}
+  labels:
+    app: product-service
+
+spec:
+  replicas: {{.Values.productService.replicaCount}}
+  selector:
+    matchLabels:
+      app: product-service
+
+  template:
+    metadata:
+      labels:
+        app: product-service
+
+    spec:
+      containers:
+        - name: product-service
+          image: "{{.Values.productService.image.repository}}:{{.Values.productService.image.tag}}"
+          ports:
+            - containerPort: {{.Values.productService.service.port}}
+
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: DB_HOST
+
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: DB_PORT
+
+            - name: DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: DB_USER
+
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: DB_NAME
+
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-app-secret
+                  key: DB_PASS
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4003
+
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4003
+
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+
+            limits:
+              memory: "256Mi"
+              cpu: "200m"

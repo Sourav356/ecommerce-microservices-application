@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: {{.Values.namespace}}
+  labels:
+    app: api-gateway
+
+spec:
+  replicas: {{.Values.apiGateway.replicaCount}}
+  selector:
+    matchLabels:
+      app: api-gateway
+
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+
+    spec:
+      containers:
+        - name: api-gateway
+          image: "{{.Values.apiGateway.image.repository}}:{{.Values.apiGateway.image.tag}}"
+          ports:
+            - containerPort: {{.Values.apiGateway.service.port}}
+
+          env:
+            - name: USER_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: USER_SERVICE_URL
+
+            - name: PRODUCT_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: PRODUCT_SERVICE_URL
+
+            - name: CART_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: CART_SERVICE_URL
+
+            - name: INVENTORY_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: INVENTORY_SERVICE_URL
+
+            - name: ORDER_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: ORDER_SERVICE_URL
+
+            - name: PAYMENT_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: PAYMENT_SERVICE_URL
+
+            - name: NOTIFICATION_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: NOTIFICATION_SERVICE_URL
+
+            - name: REVIEW_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: REVIEW_SERVICE_URL
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+
+            limits:
+              memory: "256Mi"
+              cpu: "200m"

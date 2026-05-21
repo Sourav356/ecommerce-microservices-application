@@ -1,0 +1,23 @@
+apiVersion: v1
+
+kind: Service
+metadata:
+  name: frontend-ec
+  namespace: {{.Values.namespace}}
+  labels:
+    app: frontend-ec
+
+spec:
+  selector:
+    app: frontend-ec
+
+  ports:
+    - port: {{.Values.frontendEc.service.port}}
+      
+      targetPort: {{.Values.frontendEc.service.port}}
+
+  type: ClusterIP
+
+  
+
+  

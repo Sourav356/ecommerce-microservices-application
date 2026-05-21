@@ -1,0 +1,6 @@
+apiVersion: v2  # Helm chart API version
+name: ecommerce-app   #chart name
+description: A Helm chart for deploying an ecommerce application  #chart description
+type: application #chart type
+version: 1.0.0  #Helm chart version
+appVersion: "1.0.0" #version of the application being deployed

@@ -1,0 +1,25 @@
+apiVersion: v1
+
+kind: ConfigMap
+
+metadata:
+  name: ecommerce-config
+  namespace: {{ .Values.namespace }}
+
+data:
+  DB_HOST: "postgres"
+
+  DB_PORT: "5432"
+
+  DB_USER: "postgres"
+
+  DB_NAME: "ecommerce"
+
+  USER_SERVICE_URL: "http://user-service:4001"
+  PRODUCT_SERVICE_URL: "http://product-service:4003"
+  CART_SERVICE_URL: "http://cart-service:4004"
+  INVENTORY_SERVICE_URL: "http://inventory-service:4005"
+  ORDER_SERVICE_URL: "http://order-service:4006"
+  PAYMENT_SERVICE_URL: "http://payment-service:4007"
+  NOTIFICATION_SERVICE_URL: "http://notification-service:4008"
+  REVIEW_SERVICE_URL: "http://review-service:4002"

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: frontend-ec
+  namespace: {{.Values.namespace}}
+  labels:
+    app: frontend-ec
+
+spec:
+  replicas: {{.Values.frontendEc.replicaCount}}
+  selector:
+    matchLabels:
+      app: frontend-ec
+  template:
+    metadata:
+      labels:
+        app: frontend-ec
+    
+    spec:
+      containers:
+        - name: frontend-ec
+          image: "{{.Values.frontendEc.image.repository}}:{{.Values.frontendEc.image.tag}}"
+          ports:
+            - containerPort: {{.Values.frontendEc.service.port}}
+
+          
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+
+            limits:
+              memory: "128Mi"
+              cpu: "100m"

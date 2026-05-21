@@ -1,0 +1,245 @@
+services:
+    api-gateway:
+        image: souravdevopsdev/api-gateway-ec:0.0.2
+        container_name: api-gateway
+        ports:
+            - "4000:4000"
+        environment:
+            - USER_SERVICE_URL=http://user-service:4001
+            - PRODUCT_SERVICE_URL=http://product-service:4003
+            - CART_SERVICE_URL=http://cart-service:4004
+            - INVENTORY_SERVICE_URL=http://inventory-service:4005
+            - ORDER_SERVICE_URL=http://order-service:4006
+            - PAYMENT_SERVICE_URL=http://payment-service:4007
+            - NOTIFICATION_SERVICE_URL=http://notification-service:4008
+            - REVIEW_SERVICE_URL=http://review-service:4002
+        depends_on:
+            user-service:
+                condition: service_healthy
+            product-service:
+                condition: service_healthy
+            cart-service:
+                condition: service_healthy
+            inventory-service:
+                condition: service_healthy
+            order-service:
+                condition: service_healthy
+            payment-service:
+                condition: service_healthy
+            notification-service:
+                condition: service_healthy
+            review-service:
+                condition: service_healthy
+        networks:
+            - ecommerce-network
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://localhost:4000/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+    user-service:
+        image: souravdevopsdev/user-service-ec:V2
+        container_name: user-service
+        ports:
+            - "4001:4001"
+        environment:
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_USER=postgres
+            - DB_PASS=Sourav@26
+            - DB_NAME=ecommerce
+            - ADMIN_PASSWORD=Iwannabeyours@26
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - ecommerce-network
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://localhost:4001/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+    product-service:
+        image: souravdevopsdev/product-service-ec:V1
+        container_name: product-service
+        ports:
+            - "4003:4003"
+        environment:
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_USER=postgres
+            - DB_PASS=Sourav@26
+            - DB_NAME=ecommerce
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - ecommerce-network
+        healthcheck:
+            test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4003/health')"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    cart-service:
+        image: souravdevopsdev/cart-service-ec:latest
+        container_name: cart-service
+        ports:
+            - "4004:4004"
+        environment:
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_USER=postgres
+            - DB_PASS=Sourav@26
+            - DB_NAME=ecommerce
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - ecommerce-network
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://localhost:4004/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    inventory-service:
+        image: souravdevopsdev/inventory-service-ec:V1
+        container_name: inventory-service
+        ports:
+            - "4005:4005"
+        environment:
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_USER=postgres
+            - DB_PASS=Sourav@26
+            - DB_NAME=ecommerce
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - ecommerce-network
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://localhost:4005/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    order-service:
+        image: souravdevopsdev/order-service-ec:latest
+        container_name: order-service
+        ports:
+            - "4006:4006"
+        environment:
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_USER=postgres
+            - DB_PASS=Sourav@26
+            - DB_NAME=ecommerce
+            - GATEWAY_URL=http://api-gateway:4000/api
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - ecommerce-network
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://localhost:4006/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    payment-service:
+        image: souravdevopsdev/payment-service-ec:latest
+        container_name: payment-service
+        ports:
+            - "4007:4007"
+        environment:
+            - "DB_URL=postgres://postgres:Sourav%4026@postgres:5432/ecommerce?sslmode=disable&search_path=payment_schema"
+        networks:
+            - ecommerce-network
+        depends_on:
+            postgres:
+                condition: service_healthy
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://localhost:4007/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    notification-service:
+        image: souravdevopsdev/notification-service-ec:latest
+        container_name: notification-service
+        ports:
+            - "4008:4008"
+        networks:
+            - ecommerce-network
+        healthcheck:
+            test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4008/health')"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    review-service:
+        image: souravdevopsdev/review-service-ec:latest
+        container_name: review-service
+        ports:
+            - "4002:4009"
+        environment:
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_USER=postgres
+            - DB_PASS=Sourav@26
+            - DB_NAME=ecommerce
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - ecommerce-network
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://localhost:4009/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    frontend:
+        image: souravdevopsdev/frontend-ec:V1
+        container_name: frontend
+        ports:
+            - "80:80"
+        depends_on:
+            api-gateway:
+                condition: service_healthy
+        networks:
+            - ecommerce-network
+        healthcheck:
+            test: ["CMD", "wget", "-qO-", "http://localhost:80/health"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    postgres:
+        image: postgres:15
+        container_name: postgres
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: Sourav@26
+            POSTGRES_DB: ecommerce
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        networks:
+            - ecommerce-network
+        
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "postgres"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+networks:
+    ecommerce-network:
+        driver: bridge
+
+volumes:
+    postgres-data:
+

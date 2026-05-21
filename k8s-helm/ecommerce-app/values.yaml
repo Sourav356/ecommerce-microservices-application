@@ -1,0 +1,42 @@
+namespace : ecommerce
+
+
+apiGateway:
+  image:
+    repository: souravdevopsdev/api-gateway-ec
+    tag: 0.0.2
+
+  replicaCount: 2
+
+  service:
+    port: 4000
+
+frontendEc:
+  image:
+    repository: souravdevopsdev/frontend-ec 
+    tag: V1
+
+  replicaCount: 2
+
+  service:
+    port: 80
+
+userService:
+  image:
+    repository: souravdevopsdev/user-service-ec
+    tag: V2
+
+  replicaCount: 2
+
+  service:
+    port: 4001
+
+productService:
+  image:
+    repository: souravdevopsdev/product-service-ec
+    tag: V1
+
+  replicaCount: 2
+
+  service:
+    port: 4003

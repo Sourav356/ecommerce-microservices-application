@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: {{.Values.namespace}}
+  labels:
+    app: user-service
+
+spec:
+  replicas: {{.Values.userService.replicaCount}}
+  selector:
+    matchLabels:
+      app: user-service
+
+  template:
+    metadata:
+      labels:
+        app: user-service
+
+    spec:
+      containers:
+        - name: user-service
+          image: "{{.Values.userService.image.repository}}:{{.Values.userService.image.tag}}"
+          ports:
+            - containerPort: {{.Values.userService.service.port}}
+
+          env:
+
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: DB_HOST
+
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: DB_PORT
+
+            - name: DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: DB_USER
+
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ecommerce-config
+                  key: DB_NAME
+
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-app-secret
+                  key: DB_PASS
+
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-app-secret
+                  key: ADMIN_PASSWORD
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4001
+
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4001
+
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+
+            
+

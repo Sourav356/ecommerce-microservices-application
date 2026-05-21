@@ -1,0 +1,25 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateServiceLinkedRole",
+        "ec2:*",
+        "elasticloadbalancing:*",
+        "acm:DescribeCertificate",
+        "acm:ListCertificates",
+        "acm:GetCertificate",
+        "cognito-idp:DescribeUserPoolClient",
+        "iam:ListServerCertificates",
+        "iam:GetServerCertificate",
+        "waf-regional:*",
+        "wafv2:*",
+        "shield:*",
+        "tag:GetResources",
+        "tag:TagResources"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
