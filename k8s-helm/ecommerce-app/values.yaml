@@ -1,5 +1,6 @@
 namespace : ecommerce
 
+#Add S3 here or not ??
 
 apiGateway:
   image:

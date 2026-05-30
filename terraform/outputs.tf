@@ -48,6 +48,9 @@ output "eks_oidc_provider_arn" {
   value = module.eks.oidc_provider_arn
 }
 
+output "configure_kubectl" {
+  value = "aws eks update-kubeconfig --region ap-south-2 --name ${module.eks.cluster_name}"
+}
 ########################################
 # IAM / IRSA OUTPUTS
 ########################################
@@ -88,6 +91,11 @@ output "rds_endpoint" {
   description = "PostgreSQL RDS Endpoint"
 
   value = module.rds.db_instance_endpoint
+}
+
+output "rds_address" {
+  description = "PostgreSQL RDS Address"
+  value = module.rds.rds_address
 }
 
 output "rds_port" {
@@ -159,13 +167,13 @@ output "logging_namespace" {
 output "secret_arn" {
   description = "AWS Secrets Manager Secret ARN"
 
-  value = aws_secretsmanager_secret.app_secret.arn
+  value = module.secrets-manager.secret_arn
 }
 
 output "secret_name" {
   description = "AWS Secrets Manager Secret Name"
 
-  value = aws_secretsmanager_secret.app_secret.name
+  value = module.secrets-manager.secret_name
 }
 
 ########################################

@@ -17,3 +17,7 @@ variable "oidc_provider_arn" {
 variable "alb_controller_role_arn" {
   type = string
 }
+
+variable "vpc_id" {
+  type = string
+}

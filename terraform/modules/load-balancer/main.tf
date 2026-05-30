@@ -10,6 +10,7 @@ resource "helm_release" "alb_controller" {
       cluster_name = var.cluster_name
       region       = var.region
       role_arn     = var.alb_controller_role_arn
+      vpc_id       = var.vpc_id
     })
   ]
 }

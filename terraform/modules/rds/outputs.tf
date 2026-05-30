@@ -3,9 +3,14 @@ output "db_instance_endpoint" {
   value       = aws_db_instance.main.endpoint
 }
 
-output "db_instance_name" {
+output "rds_address" {
+  description = "The address of the RDS instance"
+  value       = aws_db_instance.main.address
+}
 
-  value = aws_db_instance.main.db_name
+output "db_instance_name" {
+  description = "The name of the RDS instance"
+  value       = aws_db_instance.main.db_name
 }
 
 output "db_instance_port" {

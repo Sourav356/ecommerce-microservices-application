@@ -107,6 +107,8 @@ module "load_balancer" {
   oidc_issuer             = replace(module.eks.oidc_issuer, "https://", "")
   oidc_provider_arn       = module.eks.oidc_provider_arn
 
+  vpc_id = module.network.vpc_id
+
   depends_on = [
     module.eks,
     module.irsa
@@ -161,7 +163,8 @@ module "argocd" {
   argocd_chart_version = "7.7.11"
 
   depends_on = [
-    module.eks 
+    module.eks,
+    module.load_balancer
   ]
 }
 
@@ -175,14 +178,19 @@ module "secrets-manager" {
 
   admin_password = var.admin_password
 
-  db_url = var.db_url
+ db_url = "postgres://${var.db_user}:${urlencode(var.db_password)}@${module.rds.db_instance_endpoint}/${var.db_name}?sslmode=disable&search_path=payment_schema"
+
+  depends_on = [
+    module.rds
+  ]
 }
 
 module "monitoring" {
   source = "./modules/monitoring"
 
   depends_on = [
-    module.eks 
+    module.eks,
+    module.load_balancer
   ]
 }
 
@@ -190,6 +198,16 @@ module "logging" {
   source = "./modules/logging"
 
   depends_on = [
-    module.eks 
+    module.eks,
+    module.load_balancer
+  ]
+}
+
+module "metrics-server" {
+
+  source = "./modules/metrics-server"
+
+  depends_on = [
+    module.eks
   ]
 }

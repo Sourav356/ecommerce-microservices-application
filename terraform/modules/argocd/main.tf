@@ -13,6 +13,8 @@ resource "helm_release" "argocd" {
 
   create_namespace = false
 
+  timeout = 900
+
 }
 
 resource "kubernetes_ingress_v1" "argocd" {

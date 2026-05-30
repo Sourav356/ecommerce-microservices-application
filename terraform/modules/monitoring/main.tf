@@ -13,7 +13,12 @@ resource "helm_release" "kube_prometheus_stack" {
 
   create_namespace = false
 
+  timeout    = 900
+  wait              = true
+  
+
   values = [
     file("${path.module}/values.yaml")
   ]
+
 }

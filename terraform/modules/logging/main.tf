@@ -13,6 +13,8 @@ resource "helm_release" "loki" {
 
   create_namespace = false
 
+  timeout = 900
+
   values = [
     file("${path.module}/values.yaml")
   ]

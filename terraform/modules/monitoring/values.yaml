@@ -2,7 +2,7 @@ grafana:
   adminPassword: admin123
 
   service:
-    type: LoadBalancer
+    type: ClusterIP
 
 prometheus:
   prometheusSpec:
