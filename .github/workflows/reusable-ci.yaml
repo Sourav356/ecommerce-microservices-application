@@ -37,6 +37,7 @@ jobs:
             -Dsonar.projectKey=${{ inputs.service_name }}
             -Dsonar.sources=${{ inputs.service_name }}
             -Dsonar.qualitygate.wait=false 
+            -Dsonar.organization=sourav356 
 
       # 2. LOCAL DOCKER BUILD (To allow Trivy to scan the image)
       - name: Build local image for scanning
