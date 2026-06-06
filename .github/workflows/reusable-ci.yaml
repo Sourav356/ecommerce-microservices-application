@@ -82,21 +82,21 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./${{ inputs.service_name }}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # 7. HANDOVER TO MANIFESTS (FIXED: Safe path structure download)
+            # 7. HANDOVER TO MANIFESTS (FIXED: Official Marketplace Action Engine)
       - name: Update Helm values.yaml Tag
-        run: |
-          # Use pre-installed environment capabilities or safe releases fetch targeting
-          sudo curl -L "https://github.com" -o /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
-          
-          # Safely update the specific service tag in values.yaml
-          yq -i ".[\"${{ inputs.service_name }}\"].image.tag = \"${{ github.sha }}\"" ./k8s-helm/ecommerce-app/values.yaml
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i ".[\"${{ inputs.service_name }}\"].image.tag = \"${{ github.sha }}\"" ./k8s-helm/ecommerce-app/values.yaml
 
       - name: Commit and Push Changes back to Monorepo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Pull latest branch configurations to prevent merge conflict race condition delays
           git pull origin main --rebase
+          
           git add ./k8s-helm/ecommerce-app/values.yaml
           git commit -m "chore(gitops): auto-update ${{ inputs.service_name }} tag to ${{ github.sha }}"
           git push origin main
+
