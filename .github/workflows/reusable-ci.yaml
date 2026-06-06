@@ -83,20 +83,18 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       # 7. HANDOVER TO MANIFESTS (FIXED: Clean dot notation without escaped quotes)
-    
       - name: Update Helm values.yaml Tag
         uses: mikefarah/yq@master
         with:
           cmd: 'yq -i ''.["${{ inputs.service_name }}"].image.tag = "${{ github.sha }}"'' ./k8s-helm/ecommerce-app/values.yaml'
 
+      # 8. ATOMIC COMMIT AND PUSH (FIXED: Race-condition proof marketplace engine)
       - name: Commit and Push Changes back to Monorepo
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@://github.com"
-          
-          # Pull latest changes to avoid parallel race condition collisions
-          git pull origin main --rebase
-          
-          git add ./k8s-helm/ecommerce-app/values.yaml
-          git commit -m "chore(gitops): auto-update ${{ inputs.service_name }} tag to ${{ github.sha }}"
-          git push origin main
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(gitops): auto-update ${{ inputs.service_name }} tag to ${{ github.sha }}"
+          file_pattern: "./k8s-helm/ecommerce-app/values.yaml"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@://github.com"
+          commit_author: "github-actions[bot] <github-actions[bot]@://github.com>"
+
