@@ -27,17 +27,19 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # 1. SONARQUBE ANALYSIS (Code Scan)
+            # 1. SONARQUBE ANALYSIS (Unified Project Configuration)
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: "https://sonarcloud.io" 
         with:
           args: >
-            -Dsonar.projectKey=${{ inputs.service_name }}
-            -Dsonar.sources=${{ inputs.service_name }}
-            -Dsonar.qualitygate.wait=false 
+            -Dsonar.projectKey=ecommerce-microservices-application
             -Dsonar.organization=sourav356 
+            -Dsonar.sources=${{ inputs.service_name }}
+            -Dsonar.qualitygate.wait=false
+ 
 
       # 2. LOCAL DOCKER BUILD (To allow Trivy to scan the image)
       - name: Build local image for scanning
