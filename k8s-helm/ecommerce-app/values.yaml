@@ -2,7 +2,7 @@ namespace: ecommerce
 api-gateway:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/api-gateway"
-    tag: "ed1e7c1423467fa59398d37ecbf1c0896edc58af"
+    tag: "a0233618b4a786b4092ed522a0dee64ae1049d9f"
   replicaCount: 2
   service:
     port: 4000
