@@ -16,6 +16,9 @@ on:
       AWS_ACCOUNT_ID:
         required: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   ci-pipeline:
     runs-on: ubuntu-latest
@@ -26,8 +29,7 @@ jobs:
           fetch-depth: 0 
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 1. SONARQUBE ANALYSIS (Code Scan)
-            # 1. SONARQUBE ANALYSIS (Unified Project Configuration)
+      # 1. SONARQUBE ANALYSIS (FIXED: Added java bytecode configuration properties fallback)
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
@@ -39,14 +41,14 @@ jobs:
             -Dsonar.organization=sourav356 
             -Dsonar.sources=${{ inputs.service_name }}
             -Dsonar.qualitygate.wait=false
- 
+            -Dsonar.java.binaries=.
 
-      # 2. LOCAL DOCKER BUILD (To allow Trivy to scan the image)
+      # 2. LOCAL DOCKER BUILD
       - name: Build local image for scanning
         run: |
           docker build -t my-app:${{ github.sha }} ./${{ inputs.service_name }}
 
-      # 3. TRIVY VULNERABILITY SCAN (Image Scan)
+      # 3. TRIVY VULNERABILITY SCAN
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.35.0
         with:
@@ -57,7 +59,7 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-      # 4. LOG IN TO AWS (FIXED: Region updated to match your ECR infrastructure)
+      # 4. LOG IN TO AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -80,11 +82,11 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./${{ inputs.service_name }}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # 7. HANDOVER TO MANIFESTS (FIXED: Complete binary link implemented)
+      # 7. HANDOVER TO MANIFESTS (FIXED: Safe path structure download)
       - name: Update Helm values.yaml Tag
         run: |
-          # Download the real yq tool executable file
-          sudo wget https://github.com -O /usr/bin/yq
+          # Use pre-installed environment capabilities or safe releases fetch targeting
+          sudo curl -L "https://github.com" -o /usr/bin/yq
           sudo chmod +x /usr/bin/yq
           
           # Safely update the specific service tag in values.yaml
@@ -94,10 +96,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Pull latest changes to avoid parallel workflow race condition collisions
           git pull origin main --rebase
-          
           git add ./k8s-helm/ecommerce-app/values.yaml
           git commit -m "chore(gitops): auto-update ${{ inputs.service_name }} tag to ${{ github.sha }}"
           git push origin main
