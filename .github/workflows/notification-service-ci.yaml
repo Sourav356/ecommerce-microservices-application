@@ -6,9 +6,14 @@ on:
     paths:
       - 'notification-service/**' # Triggers only when files inside the notification-service folder change
 
+    paths-ignore:
+      - 'k8s-helm/**'
+
 concurrency:
   group: gitops-manifest-updates
-  cancel-in-progress: false # Forces them to wait in queue instead of canceling each other
+  cancel-in-progress: true # Keeps the queue clean
+
+
 
 jobs:
   trigger-ci:
