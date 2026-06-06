@@ -8,7 +8,7 @@ api-gateway:
     port: 4000
 frontend:
   image:
-    repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/frontend-ec"
+    repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/frontend"
     tag: "latest"
   replicaCount: 2
   service:
