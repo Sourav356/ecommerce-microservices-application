@@ -46,7 +46,7 @@ jobs:
 
       # 3. TRIVY VULNERABILITY SCAN (Image Scan)
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: 'my-app:${{ github.sha }}'
           format: 'table'
