@@ -1,110 +1,71 @@
-namespace : ecommerce
-
-
-
+namespace: ecommerce
 api-gateway:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/api-gateway"
-    tag: "latest"
-
+    tag: "837a47d912d65bc8e58dbf420ea91be6385467a1"
   replicaCount: 2
-
   service:
     port: 4000
-
 frontend:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/frontend-ec"
     tag: "latest"
-
   replicaCount: 2
-
   service:
     port: 80
-
 user-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/user-service"
     tag: "latest"
-
   replicaCount: 2
-
   service:
     port: 4001
-
 product-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/product-service"
     tag: "latest"
-
   replicaCount: 2
-
   service:
     port: 4003
-
 cart-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/cart-service"
     tag: "latest"
-
   replicaCount: 2
-
   service:
     port: 4004
-
-
 inventory-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/inventory-service"
     tag: "latest"
-
   replicaCount: 2
-
   service:
     port: 4005
-
-
 order-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/order-service"
     tag: "latest"
-
   replicaCount: 2
-
   service:
     port: 4006
-
-
 payment-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/payment-service"
     tag: "latest"
-
   replicaCount: 2
-
   service:
     port: 4007
-
-
 notification-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/notification-service"
     tag: "latest"
-
   replicaCount: 2
-
   service:
     port: 4008
-
-
 review-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/review-service"
     tag: "latest"
-
   replicaCount: 2
-
   service:
     port: 4002
-
-
