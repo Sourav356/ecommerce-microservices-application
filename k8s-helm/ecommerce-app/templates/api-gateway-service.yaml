@@ -12,8 +12,8 @@ spec:
     app: api-gateway
     
   ports:
-    - port: {{.Values.apiGateway.service.port}}
+    - port: {{.Values.api-gateway.service.port}}
 
-      targetPort: {{.Values.apiGateway.service.port}}
+      targetPort: {{.Values.api-gateway.service.port}}
 
   type: ClusterIP

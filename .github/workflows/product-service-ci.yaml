@@ -1,0 +1,18 @@
+name: Product Service CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'product-service/**' # Replace with your exact product folder name
+
+jobs:
+  trigger-ci:
+    uses: ./.github/workflows/reusable-ci.yaml
+    with:
+      service_name: 'product-service' # Replace with your exact product folder name
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}

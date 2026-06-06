@@ -12,9 +12,9 @@ spec:
     app: frontend-ec
 
   ports:
-    - port: {{.Values.frontendEc.service.port}}
+    - port: {{.Values.frontend.service.port}}
       
-      targetPort: {{.Values.frontendEc.service.port}}
+      targetPort: {{.Values.frontend.service.port}}
 
   type: ClusterIP
 

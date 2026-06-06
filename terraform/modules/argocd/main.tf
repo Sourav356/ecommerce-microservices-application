@@ -23,24 +23,28 @@ resource "kubernetes_ingress_v1" "argocd" {
     namespace = kubernetes_namespace.argocd.metadata[0].name
 
     annotations = {
-      "kubernetes.io/ingress.class" = "alb"
-
-      "alb.ingress.kubernetes.io/scheme" = "internet-facing"
-
+      "kubernetes.io/ingress.class"           = "alb"
+      "alb.ingress.kubernetes.io/scheme"      = "internet-facing"
       "alb.ingress.kubernetes.io/target-type" = "ip"
+
+      # ✅ Recommended stable fix
+      "alb.ingress.kubernetes.io/backend-protocol" = "HTTP"
     }
   }
 
   spec {
+
+    ingress_class_name = "alb"
+    
     rule {
       http {
         path {
-          path = "/"
+          path      = "/"
+          path_type = "Prefix"
 
           backend {
             service {
               name = "argocd-server"
-
               port {
                 number = 80
               }
@@ -51,4 +55,12 @@ resource "kubernetes_ingress_v1" "argocd" {
     }
   }
 }
+
+
+# resource "kubernetes_manifest" "ecommerce_app" {
+#   depends_on = [helm_release.argocd]
+
+#   # Looks directly in the same folder where this main.tf lives!
+#   manifest = yamldecode(file("${path.module}/argocd-application.yaml"))
+# }
 

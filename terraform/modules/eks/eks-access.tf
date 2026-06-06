@@ -1,5 +1,5 @@
 resource "aws_eks_access_entry" "sourav_admin" {
-  cluster_name  = var.cluster_name
+  cluster_name  = aws_eks_cluster.eks-cluster.name
 
   principal_arn = "arn:aws:iam::637043415174:user/sourav_admin"
 
@@ -7,7 +7,7 @@ resource "aws_eks_access_entry" "sourav_admin" {
 }
 
 resource "aws_eks_access_policy_association" "sourav_admin_admin" {
-  cluster_name  = var.cluster_name
+  cluster_name  = aws_eks_cluster.eks-cluster.name
 
   principal_arn = "arn:aws:iam::637043415174:user/sourav_admin"
 

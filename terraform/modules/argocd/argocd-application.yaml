@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ecommerce-microservices
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # 1. Points ArgoCD to your exact monorepo
+    repoURL: 'https://github.com'
+    targetRevision: main
+    
+    # 2. Points to your Helm chart path at the root of your monorepo
+    path: k8s-helm/ecommerce-app
+    helm:
+      # Automatically looks for your values.yaml file inside that folder
+      valueFiles:
+        - values.yaml
+        
+  destination:
+    # 3. Deploys directly into the EKS cluster where ArgoCD is running
+    server: 'https://default.svc'
+    namespace: ecommerce-apps # The namespace where your 10 microservices will live
+    
+  syncPolicy:
+    automated:
+      prune: true     # Automatically deletes resources in K8s if you delete them from Git
+      selfHeal: true  # Automatically overrides manual 'kubectl edit' changes to match Git
+    syncOptions:
+      - CreateNamespace=true # Tells ArgoCD to create the 'ecommerce-apps' namespace automatically

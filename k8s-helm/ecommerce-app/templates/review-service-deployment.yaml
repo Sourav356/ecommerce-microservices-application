@@ -2,28 +2,28 @@ apiVersion: apps/v1
 
 kind: Deployment
 metadata:
-  name: product-service
+  name: review-service
   namespace: {{.Values.namespace}}
   labels:
-    app: product-service
+    app: review-service
 
 spec:
-  replicas: {{.Values.product-service.replicaCount}}
+  replicas: {{.Values.review-service.replicaCount}}
   selector:
     matchLabels:
-      app: product-service
+      app: review-service
 
   template:
     metadata:
       labels:
-        app: product-service
+        app: review-service
 
     spec:
       containers:
-        - name: product-service
-          image: "{{.Values.product-service.image.repository}}:{{.Values.product-service.image.tag}}"
+        - name: review-service
+          image: "{{.Values.review-service.image.repository}}:{{.Values.review-service.image.tag}}"
           ports:
-            - containerPort: {{.Values.product-service.service.port}}
+            - containerPort: {{.Values.review-service.service.port}}
 
           env:
             - name: DB_HOST
@@ -59,7 +59,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: {{.Values.product-service.service.port}}
+              port: {{.Values.review-service.service.port}}
 
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -67,7 +67,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: {{.Values.product-service.service.port}}
+              port: {{.Values.review-service.service.port}}
 
             initialDelaySeconds: 30
             periodSeconds: 10

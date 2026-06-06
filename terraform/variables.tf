@@ -65,11 +65,6 @@ variable "admin_password" {
   sensitive = true
 }
 
-variable "db_url" {
-  type      = string
-  sensitive = true
-}
-
 variable "bucket_name" {
   description = "Name of the S3 bucket for EKS"
   type        = string

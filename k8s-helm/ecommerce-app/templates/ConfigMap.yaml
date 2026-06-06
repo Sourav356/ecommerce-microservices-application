@@ -23,3 +23,4 @@ data:
   PAYMENT_SERVICE_URL: "http://payment-service:4007"
   NOTIFICATION_SERVICE_URL: "http://notification-service:4008"
   REVIEW_SERVICE_URL: "http://review-service:4002"
+  GATEWAY_URL: "http://api-gateway:4000/api"

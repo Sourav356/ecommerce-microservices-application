@@ -2,28 +2,28 @@ apiVersion: apps/v1
 
 kind: Deployment
 metadata:
-  name: product-service
+  name: inventory-service
   namespace: {{.Values.namespace}}
   labels:
-    app: product-service
+    app: inventory-service
 
 spec:
-  replicas: {{.Values.product-service.replicaCount}}
+  replicas: {{.Values.inventory-service.replicaCount}}
   selector:
     matchLabels:
-      app: product-service
+      app: inventory-service
 
   template:
     metadata:
       labels:
-        app: product-service
+        app: inventory-service
 
     spec:
       containers:
-        - name: product-service
-          image: "{{.Values.product-service.image.repository}}:{{.Values.product-service.image.tag}}"
+        - name: inventory-service
+          image: "{{.Values.inventory-service.image.repository}}:{{.Values.inventory-service.image.tag}}"
           ports:
-            - containerPort: {{.Values.product-service.service.port}}
+            - containerPort: {{.Values.inventory-service.service.port}}
 
           env:
             - name: DB_HOST
@@ -59,7 +59,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: {{.Values.product-service.service.port}}
+              port: {{.Values.inventory-service.service.port}}
 
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -67,7 +67,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: {{.Values.product-service.service.port}}
+              port: {{.Values.inventory-service.service.port}}
 
             initialDelaySeconds: 30
             periodSeconds: 10

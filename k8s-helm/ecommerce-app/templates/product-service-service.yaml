@@ -12,8 +12,8 @@ spec:
     app: product-service
 
   ports:
-    - port: {{.Values.productService.service.port}}
+    - port: {{.Values.product-service.service.port}}
 
-      targetPort: {{.Values.productService.service.port}}
+      targetPort: {{.Values.product-service.service.port}}
 
   type: ClusterIP

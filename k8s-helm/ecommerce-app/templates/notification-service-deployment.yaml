@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: {{.Values.namespace}}
+  labels:
+    app: notification-service
+
+spec:
+  replicas: {{.Values.notification-service.replicaCount}}
+  selector:
+    matchLabels:
+      app: notification-service
+
+  template:
+    metadata:
+      labels:
+        app: notification-service
+
+    spec:
+      containers:
+        - name: notification-service
+          image: "{{.Values.notification-service.image.repository}}:{{.Values.notification-service.image.tag}}"
+          ports:
+            - containerPort: {{.Values.notification-service.service.port}}
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{.Values.notification-service.service.port}}
+
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{.Values.notification-service.service.port}}
+
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+
+            limits:
+              memory: "256Mi"
+              cpu: "200m"

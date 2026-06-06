@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: {{.Values.namespace}}
+  labels:
+    app: payment-service
+
+spec:
+  replicas: {{.Values.payment-service.replicaCount}}
+  selector:
+    matchLabels:
+      app: payment-service
+
+  template:
+    metadata:
+      labels:
+        app: payment-service
+
+    spec:
+      containers:
+        - name: payment-service
+          image: "{{.Values.payment-service.image.repository}}:{{.Values.payment-service.image.tag}}"
+          ports:
+            - containerPort: {{.Values.payment-service.service.port}}
+
+          env:
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-app-secret
+                  key: DB_URL
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{.Values.payment-service.service.port}}
+
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{.Values.payment-service.service.port}}
+
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+
+            limits:
+              memory: "256Mi"
+              cpu: "200m"

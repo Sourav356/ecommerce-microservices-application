@@ -12,9 +12,9 @@ spec:
     app: user-service
 
   ports:
-    - port: {{.Values.userService.service.port}}
+    - port: {{.Values.user-service.service.port}}
 
-      targetPort: {{.Values.userService.service.port}}
+      targetPort: {{.Values.user-service.service.port}}
 
   type: ClusterIP
 

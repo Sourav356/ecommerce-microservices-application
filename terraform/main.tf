@@ -178,7 +178,7 @@ module "secrets-manager" {
 
   admin_password = var.admin_password
 
- db_url = "postgres://${var.db_user}:${urlencode(var.db_password)}@${module.rds.db_instance_endpoint}/${var.db_name}?sslmode=disable&search_path=payment_schema"
+  db_url = "postgres://${var.db_user}:${urlencode(var.db_password)}@${module.rds.db_instance_endpoint}/${var.db_name}?sslmode=disable&search_path=payment_schema"
 
   depends_on = [
     module.rds

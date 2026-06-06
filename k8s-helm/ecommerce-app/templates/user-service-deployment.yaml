@@ -7,7 +7,7 @@ metadata:
     app: user-service
 
 spec:
-  replicas: {{.Values.userService.replicaCount}}
+  replicas: {{.Values.user-service.replicaCount}}
   selector:
     matchLabels:
       app: user-service
@@ -20,9 +20,9 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: "{{.Values.userService.image.repository}}:{{.Values.userService.image.tag}}"
+          image: "{{.Values.user-service.image.repository}}:{{.Values.user-service.image.tag}}"
           ports:
-            - containerPort: {{.Values.userService.service.port}}
+            - containerPort: {{.Values.user-service.service.port}}
 
           env:
 
@@ -65,7 +65,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 4001
+              port: {{.Values.user-service.service.port}}
 
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -73,7 +73,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 4001
+              port: {{.Values.user-service.service.port}}
 
             initialDelaySeconds: 30
             periodSeconds: 10
