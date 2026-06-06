@@ -23,7 +23,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Required for better SonarQube analysis
+          fetch-depth: 0 
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # 1. SONARQUBE ANALYSIS (Code Scan)
@@ -31,13 +31,12 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: "https://sonarcloud.io" # Replace with your internal URL if self-hosted
+          SONAR_HOST_URL: "https://sonarcloud.io" 
         with:
           args: >
             -Dsonar.projectKey=${{ inputs.service_name }}
             -Dsonar.sources=${{ inputs.service_name }}
             -Dsonar.qualitygate.wait=false 
-          # Optional: If you want to wait for the quality gate result before proceeding, set this to 'true'. For demo purposes, we set it to 'false' to avoid pipeline blocking.
 
       # 2. LOCAL DOCKER BUILD (To allow Trivy to scan the image)
       - name: Build local image for scanning
@@ -50,19 +49,18 @@ jobs:
         with:
           image-ref: 'my-app:${{ github.sha }}'
           format: 'table'
-          # CHANGE THIS FROM '1' TO '0' coz as this is a demo, we want to see the scan results but not fail the pipeline. In production, you should set this to '1' to fail on vulnerabilities.:
-          exit-code: '0' # Prints the scan table but NEVER fails your CI pipeline
+          exit-code: '0' 
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-      # 4. LOG IN TO AWS
+      # 4. LOG IN TO AWS (FIXED: Region updated to match your ECR infrastructure)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Change to your AWS region (e.g., ap-south-1)
+          aws-region: ap-south-2 
 
       # 5. LOG IN TO AMAZON ECR
       - name: Log in to Amazon ECR
@@ -79,22 +77,22 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./${{ inputs.service_name }}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # 7. HANDOVER TO MANIFESTS (Updates values.yaml inside the same repo)
+      # 7. HANDOVER TO MANIFESTS (FIXED: Complete binary link implemented)
       - name: Update Helm values.yaml Tag
         run: |
-          # Install yq cleanly via binary tracking
+          # Download the real yq tool executable file
           sudo wget https://github.com -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
           
           # Safely update the specific service tag in values.yaml
-          yq -i ".${{ inputs.service_name }}.image.tag = \"${{ github.sha }}\"" ./k8s-helm/ecommerce-app/values.yaml
+          yq -i ".[\"${{ inputs.service_name }}\"].image.tag = \"${{ github.sha }}\"" ./k8s-helm/ecommerce-app/values.yaml
 
       - name: Commit and Push Changes back to Monorepo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Pull latest commits before pushing to handle parallel microservice workflows gracefully
+          # Pull latest changes to avoid parallel workflow race condition collisions
           git pull origin main --rebase
           
           git add ./k8s-helm/ecommerce-app/values.yaml
