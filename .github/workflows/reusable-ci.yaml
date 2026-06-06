@@ -26,10 +26,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0 # Required to fetch full history for rebasing
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main # Explicitly targets the latest tip of the main branch
 
-      # 1. SONARQUBE ANALYSIS (FIXED: Added java bytecode configuration properties fallback)
+      # 1. SONARQUBE ANALYSIS (Unified Project Configuration)
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
@@ -43,18 +44,18 @@ jobs:
             -Dsonar.qualitygate.wait=false
             -Dsonar.java.binaries=.
 
-      # 2. LOCAL DOCKER BUILD
+      # 2. LOCAL DOCKER BUILD (To allow Trivy to scan the image)
       - name: Build local image for scanning
         run: |
           docker build -t my-app:${{ github.sha }} ./${{ inputs.service_name }}
 
-      # 3. TRIVY VULNERABILITY SCAN
+      # 3. TRIVY VULNERABILITY SCAN (Image Scan)
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: 'my-app:${{ github.sha }}'
           format: 'table'
-          exit-code: '0' 
+          exit-code: '0' # Prints results but avoids pipeline disruption for learning metrics
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
@@ -82,13 +83,13 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./${{ inputs.service_name }}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # 7. HANDOVER TO MANIFESTS (FIXED: Clean dot notation without escaped quotes)
+      # 7. HANDOVER TO MANIFESTS (Safely parses keys with dashes)
       - name: Update Helm values.yaml Tag
         uses: mikefarah/yq@master
         with:
           cmd: 'yq -i ''.["${{ inputs.service_name }}"].image.tag = "${{ github.sha }}"'' ./k8s-helm/ecommerce-app/values.yaml'
 
-      # 8. ATOMIC COMMIT AND PUSH (FIXED: Race-condition proof marketplace engine)
+      # 8. ATOMIC COMMIT AND PUSH (Race-condition proof marketplace engine)
       - name: Commit and Push Changes back to Monorepo
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
@@ -97,4 +98,3 @@ jobs:
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@://github.com"
           commit_author: "github-actions[bot] <github-actions[bot]@://github.com>"
-

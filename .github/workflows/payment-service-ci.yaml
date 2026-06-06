@@ -5,6 +5,9 @@ on:
     branches: [ main ]
     paths:
       - 'payment-service/**' # Triggers only when files inside the payment-service folder change
+concurrency:
+  group: gitops-manifest-updates
+  cancel-in-progress: false # Forces them to wait in queue instead of canceling each other
 
 jobs:
   trigger-ci:

@@ -6,6 +6,10 @@ on:
     paths:
       - 'notification-service/**' # Triggers only when files inside the notification-service folder change
 
+concurrency:
+  group: gitops-manifest-updates
+  cancel-in-progress: false # Forces them to wait in queue instead of canceling each other
+
 jobs:
   trigger-ci:
     uses: ./.github/workflows/reusable-ci.yaml
