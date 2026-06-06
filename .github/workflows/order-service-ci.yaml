@@ -5,9 +5,9 @@ on:
     branches: [ main ]
     paths:
       - 'order-service/**' # Triggers only when files inside the order-service folder change
+      - '!k8s-helm/**'
 
-    paths-ignore:
-      - 'k8s-helm/**'
+    
 
 concurrency:
   group: gitops-manifest-updates

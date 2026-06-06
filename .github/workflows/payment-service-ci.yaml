@@ -5,9 +5,8 @@ on:
     branches: [ main ]
     paths:
       - 'payment-service/**' # Triggers only when files inside the payment-service folder change
+      - '!k8s-helm/**'
 
-    paths-ignore:
-      - 'k8s-helm/**'
 
 concurrency:
   group: gitops-manifest-updates

@@ -5,9 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'frontend/**' # Triggers only when files inside the frontend folder change
-    
-    paths-ignore:
-      - 'k8s-helm/**'
+      - '!k8s-helm/**'
 
 concurrency:
   group: gitops-manifest-updates

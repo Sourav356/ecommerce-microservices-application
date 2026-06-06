@@ -5,9 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'inventory-service/**' # Triggers only when files inside the inventory-service folder change
-
-    paths-ignore:
-      - 'k8s-helm/**'
+      - '!k8s-helm/**'
 
 concurrency:
   group: gitops-manifest-updates
