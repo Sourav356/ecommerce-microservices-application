@@ -1,6 +1,8 @@
 apiVersion: apps/v1
-
 kind: Deployment
+
+{{- $svc := index .Values "review-service" -}}
+
 metadata:
   name: review-service
   namespace: {{.Values.namespace}}
@@ -8,7 +10,7 @@ metadata:
     app: review-service
 
 spec:
-  replicas: {{.Values.review-service.replicaCount}}
+  replicas: {{ $svc.replicaCount }}
   selector:
     matchLabels:
       app: review-service
@@ -21,9 +23,9 @@ spec:
     spec:
       containers:
         - name: review-service
-          image: "{{.Values.review-service.image.repository}}:{{.Values.review-service.image.tag}}"
+          image: "{{ $svc.image.repository }}:{{ $svc.image.tag }}"
           ports:
-            - containerPort: {{.Values.review-service.service.port}}
+            - containerPort: {{ $svc.service.port }}
 
           env:
             - name: DB_HOST
@@ -59,7 +61,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: {{.Values.review-service.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -67,7 +69,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: {{.Values.review-service.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 30
             periodSeconds: 10

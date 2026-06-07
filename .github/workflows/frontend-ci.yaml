@@ -7,9 +7,6 @@ on:
       - 'frontend/**' # Triggers only when files inside the frontend folder change
       - '!k8s-helm/**'
 
-concurrency:
-  group: gitops-manifest-updates
-  cancel-in-progress: true # Keeps the queue clean
 
 
 jobs:

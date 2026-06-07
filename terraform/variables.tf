@@ -32,7 +32,7 @@ variable "availability_zones" {
 variable "cluster_name" {
   description = "EKS cluster name"
   type        = string
-  default     = "ecommerce-cluster"
+  default     = "ecommerce-eks-cluster"
 }
 
 variable "node_groups_name" {

@@ -1,6 +1,7 @@
 apiVersion: apps/v1
-
 kind: Deployment
+
+{{- $svc := index .Values "frontend" -}}
 
 metadata:
   name: frontend-ec
@@ -9,7 +10,7 @@ metadata:
     app: frontend-ec
 
 spec:
-  replicas: {{.Values.frontend.replicaCount}}
+  replicas: {{ $svc.replicaCount }}
   selector:
     matchLabels:
       app: frontend-ec
@@ -21,15 +22,15 @@ spec:
     spec:
       containers:
         - name: frontend-ec
-          image: "{{.Values.frontend.image.repository}}:{{.Values.frontend.image.tag}}"
+          image: "{{ $svc.image.repository }}:{{ $svc.image.tag }}"
           ports:
-            - containerPort: {{.Values.frontend.service.port}}
+            - containerPort: {{ $svc.service.port }}
 
           
           readinessProbe:
             httpGet:
               path: /health
-              port: {{.Values.frontend.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -37,7 +38,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: {{.Values.frontend.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 30
             periodSeconds: 10

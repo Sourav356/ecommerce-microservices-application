@@ -1,6 +1,8 @@
 apiVersion: v1
-
 kind: Service
+
+{{- $svc := index .Values "order-service" -}}
+
 metadata:
   name: order-service
   namespace: {{.Values.namespace}}
@@ -12,8 +14,8 @@ spec:
     app: order-service
 
   ports:
-    - port: {{.Values.order-service.service.port}}
+    - port: {{ $svc.service.port }}
 
-      targetPort: {{.Values.order-service.service.port}}
+      targetPort: {{ $svc.service.port }}
 
   type: ClusterIP

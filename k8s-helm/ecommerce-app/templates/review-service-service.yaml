@@ -1,6 +1,8 @@
 apiVersion: v1
-
 kind: Service
+
+{{- $svc := index .Values "review-service" -}}
+
 metadata:
   name: review-service
   namespace: {{.Values.namespace}}
@@ -12,8 +14,8 @@ spec:
     app: review-service
 
   ports:
-    - port: {{.Values.review-service.service.port}}
+    - port: {{ $svc.service.port }}
 
-      targetPort: {{.Values.review-service.service.port}}
+      targetPort: {{ $svc.service.port }}
 
   type: ClusterIP

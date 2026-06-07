@@ -13,6 +13,8 @@ resource "aws_ecr_repository" "repos" {
     encryption_type = "AES256"
   }
 
+  force_delete = true
+
   tags = {
     Environment = var.environment
   }

@@ -1,6 +1,6 @@
 resource "aws_secretsmanager_secret" "app_secret" {
 
-  name = "ecommerce-app-secrets-prod"
+  name = "ecommerce-app-secrets-prod-2026"
 
   tags = {
     Environment = var.environment

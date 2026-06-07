@@ -1,6 +1,8 @@
 apiVersion: v1
-
 kind: Service
+
+{{- $svc := index .Values "inventory-service" -}}
+
 metadata:
   name: inventory-service
   namespace: {{.Values.namespace}}
@@ -12,8 +14,8 @@ spec:
     app: inventory-service
 
   ports:
-    - port: {{.Values.inventory-service.service.port}}
+    - port: {{ $svc.service.port }}
 
-      targetPort: {{.Values.inventory-service.service.port}}
+      targetPort: {{ $svc.service.port }}
 
   type: ClusterIP

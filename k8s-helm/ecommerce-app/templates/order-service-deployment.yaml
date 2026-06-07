@@ -1,6 +1,8 @@
 apiVersion: apps/v1
-
 kind: Deployment
+
+{{- $svc := index .Values "order-service" -}}
+
 metadata:
   name: order-service
   namespace: {{.Values.namespace}}
@@ -8,7 +10,7 @@ metadata:
     app: order-service
 
 spec:
-  replicas: {{.Values.order-service.replicaCount}}
+  replicas: {{ $svc.replicaCount }}
   selector:
     matchLabels:
       app: order-service
@@ -21,9 +23,9 @@ spec:
     spec:
       containers:
         - name: order-service
-          image: "{{.Values.order-service.image.repository}}:{{.Values.order-service.image.tag}}"
+          image: "{{ $svc.image.repository }}:{{ $svc.image.tag }}"
           ports:
-            - containerPort: {{.Values.order-service.service.port}}
+            - containerPort: {{ $svc.service.port }}
 
           env:
             - name: GATEWAY_URL
@@ -66,7 +68,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: {{.Values.order-service.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -74,7 +76,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: {{.Values.order-service.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 30
             periodSeconds: 10

@@ -1,14 +1,17 @@
 apiVersion: apps/v1
-
 kind: Deployment
+
+{{- $svc := index .Values "cart-service" -}}
+
 metadata:
   name: cart-service
-  namespace: {{.Values.namespace}}
+  namespace: {{ .Values.namespace }}
   labels:
     app: cart-service
 
 spec:
-  replicas: {{.Values.cart-service.replicaCount}}
+  replicas: {{ $svc.replicaCount }}
+
   selector:
     matchLabels:
       app: cart-service
@@ -21,9 +24,9 @@ spec:
     spec:
       containers:
         - name: cart-service
-          image: "{{.Values.cart-service.image.repository}}:{{.Values.cart-service.image.tag}}"
+          image: "{{ $svc.image.repository }}:{{ $svc.image.tag }}"
           ports:
-            - containerPort: {{.Values.cart-service.service.port}}
+            - containerPort: {{ $svc.service.port }}
 
           env:
             - name: DB_HOST
@@ -59,16 +62,14 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: {{.Values.cart-service.service.port}}
-
+              port: {{ $svc.service.port }}
             initialDelaySeconds: 10
             periodSeconds: 5
 
           livenessProbe:
             httpGet:
               path: /health
-              port: {{.Values.cart-service.service.port}}
-
+              port: {{ $svc.service.port }}
             initialDelaySeconds: 30
             periodSeconds: 10
 
@@ -76,7 +77,6 @@ spec:
             requests:
               memory: "128Mi"
               cpu: "100m"
-
             limits:
               memory: "256Mi"
               cpu: "200m"

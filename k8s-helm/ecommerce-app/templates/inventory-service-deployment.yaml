@@ -1,6 +1,8 @@
 apiVersion: apps/v1
-
 kind: Deployment
+
+{{- $svc := index .Values "inventory-service" -}}
+
 metadata:
   name: inventory-service
   namespace: {{.Values.namespace}}
@@ -8,7 +10,7 @@ metadata:
     app: inventory-service
 
 spec:
-  replicas: {{.Values.inventory-service.replicaCount}}
+  replicas: {{ $svc.replicaCount }}
   selector:
     matchLabels:
       app: inventory-service
@@ -21,9 +23,9 @@ spec:
     spec:
       containers:
         - name: inventory-service
-          image: "{{.Values.inventory-service.image.repository}}:{{.Values.inventory-service.image.tag}}"
+          image: "{{ $svc.image.repository }}:{{ $svc.image.tag }}"
           ports:
-            - containerPort: {{.Values.inventory-service.service.port}}
+            - containerPort: {{ $svc.service.port }}
 
           env:
             - name: DB_HOST
@@ -59,7 +61,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: {{.Values.inventory-service.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -67,7 +69,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: {{.Values.inventory-service.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 30
             periodSeconds: 10

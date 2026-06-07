@@ -1,6 +1,8 @@
 apiVersion: v1
-
 kind: Service
+
+{{- $svc := index .Values "cart-service" -}}
+
 metadata:
   name: cart-service
   namespace: {{.Values.namespace}}
@@ -12,8 +14,8 @@ spec:
     app: cart-service
 
   ports:
-    - port: {{.Values.cart-service.service.port}}
+    - port: {{ $svc.service.port }}
 
-      targetPort: {{.Values.cart-service.service.port}}
+      targetPort: {{ $svc.service.port }}
 
   type: ClusterIP

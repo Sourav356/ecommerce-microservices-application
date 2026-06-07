@@ -1,11 +1,16 @@
 name: Reusable Service CI
 
+permissions:
+  contents: write
+  actions: write
+
 on:
   workflow_call:
     inputs:
       service_name:
         required: true
         type: string
+
     secrets:
       SONAR_TOKEN:
         required: true
@@ -22,58 +27,57 @@ env:
 jobs:
   ci-pipeline:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Required to fetch full history for rebasing
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: main # Explicitly targets the latest tip of the main branch
+          fetch-depth: 0
 
-      # 1. SONARQUBE ANALYSIS (Unified Project Configuration)
+      # 1. SONARQUBE ANALYSIS
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: "https://sonarcloud.io" 
+          SONAR_HOST_URL: https://sonarcloud.io
         with:
           args: >
             -Dsonar.projectKey=ecommerce-microservices-application
-            -Dsonar.organization=sourav356 
+            -Dsonar.organization=sourav356
             -Dsonar.sources=${{ inputs.service_name }}
             -Dsonar.qualitygate.wait=false
             -Dsonar.java.binaries=.
 
-      # 2. LOCAL DOCKER BUILD (To allow Trivy to scan the image)
+      # 2. LOCAL BUILD
       - name: Build local image for scanning
         run: |
           docker build -t my-app:${{ github.sha }} ./${{ inputs.service_name }}
 
-      # 3. TRIVY VULNERABILITY SCAN (Image Scan)
+      # 3. TRIVY
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.35.0
         with:
-          image-ref: 'my-app:${{ github.sha }}'
-          format: 'table'
-          exit-code: '0' # Prints results but avoids pipeline disruption for learning metrics
+          image-ref: my-app:${{ github.sha }}
+          format: table
+          exit-code: "0"
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
 
-      # 4. LOG IN TO AWS
+      # 4. AWS LOGIN
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-2 
+          aws-region: ap-south-2
 
-      # 5. LOG IN TO AMAZON ECR
+      # 5. ECR LOGIN
       - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 6. BUILD & PUSH TO AWS ECR
+      # 6. BUILD & PUSH IMAGE
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -83,18 +87,14 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./${{ inputs.service_name }}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # 7. HANDOVER TO MANIFESTS (Safely parses keys with dashes)
-      - name: Update Helm values.yaml Tag
-        uses: mikefarah/yq@master
+      # 7. TRIGGER GITOPS WORKFLOW
+      - name: Trigger GitOps Workflow
+        uses: peter-evans/repository-dispatch@v3
         with:
-          cmd: 'yq -i ''.["${{ inputs.service_name }}"].image.tag = "${{ github.sha }}"'' ./k8s-helm/ecommerce-app/values.yaml'
-
-      # 8. ATOMIC COMMIT AND PUSH (Race-condition proof marketplace engine)
-      - name: Commit and Push Changes back to Monorepo
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore(gitops): auto-update ${{ inputs.service_name }} tag to ${{ github.sha }}"
-          file_pattern: "./k8s-helm/ecommerce-app/values.yaml"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@://github.com"
-          commit_author: "github-actions[bot] <github-actions[bot]@://github.com>"
+          token: ${{ github.token }}
+          event-type: gitops-update
+          client-payload: |
+            {
+              "service_name": "${{ inputs.service_name }}",
+              "image_tag": "${{ github.sha }}"
+            }

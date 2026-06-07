@@ -11,6 +11,11 @@ resource "helm_release" "argocd" {
   chart      = "argo-cd"
   version    = "7.0.0"
 
+  set {
+    name  = "configs.params.server\\.insecure"
+    value = "true"
+  }
+
   create_namespace = false
 
   timeout = 900
@@ -23,12 +28,18 @@ resource "kubernetes_ingress_v1" "argocd" {
     namespace = kubernetes_namespace.argocd.metadata[0].name
 
     annotations = {
-      "kubernetes.io/ingress.class"           = "alb"
+
+      "kubernetes.io/ingress.class" = "alb"
+
       "alb.ingress.kubernetes.io/scheme"      = "internet-facing"
       "alb.ingress.kubernetes.io/target-type" = "ip"
 
-      # ✅ Recommended stable fix
       "alb.ingress.kubernetes.io/backend-protocol" = "HTTP"
+
+      "alb.ingress.kubernetes.io/healthcheck-path" = "/"
+
+      "alb.ingress.kubernetes.io/success-codes" = "200,307"
+
     }
   }
 

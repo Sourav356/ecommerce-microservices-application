@@ -1,6 +1,8 @@
 apiVersion: v1
-
 kind: Service
+
+{{- $svc := index .Values "frontend" -}}
+
 metadata:
   name: frontend-ec
   namespace: {{.Values.namespace}}
@@ -12,9 +14,8 @@ spec:
     app: frontend-ec
 
   ports:
-    - port: {{.Values.frontend.service.port}}
-      
-      targetPort: {{.Values.frontend.service.port}}
+    - port: {{ $svc.service.port }}
+      targetPort: {{ $svc.service.port }}
 
   type: ClusterIP
 

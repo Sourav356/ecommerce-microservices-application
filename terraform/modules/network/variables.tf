@@ -16,7 +16,7 @@ variable "private_subnet_cidrs" {
 variable "cluster_name" {
   description = "EKS cluster name"
   type        = string
-  default     = "ecommerce-cluster"
+  default     = "ecommerce-eks-cluster"
 }
 
 variable "availability_zones" {

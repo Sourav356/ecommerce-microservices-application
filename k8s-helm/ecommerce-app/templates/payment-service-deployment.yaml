@@ -1,6 +1,8 @@
 apiVersion: apps/v1
-
 kind: Deployment
+
+{{- $svc := index .Values "payment-service" -}}
+
 metadata:
   name: payment-service
   namespace: {{.Values.namespace}}
@@ -8,7 +10,7 @@ metadata:
     app: payment-service
 
 spec:
-  replicas: {{.Values.payment-service.replicaCount}}
+  replicas: {{ $svc.replicaCount }}
   selector:
     matchLabels:
       app: payment-service
@@ -21,9 +23,9 @@ spec:
     spec:
       containers:
         - name: payment-service
-          image: "{{.Values.payment-service.image.repository}}:{{.Values.payment-service.image.tag}}"
+          image: "{{ $svc.image.repository }}:{{ $svc.image.tag }}"
           ports:
-            - containerPort: {{.Values.payment-service.service.port}}
+            - containerPort: {{ $svc.service.port }}
 
           env:
             - name: DB_URL
@@ -35,7 +37,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: {{.Values.payment-service.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -43,7 +45,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: {{.Values.payment-service.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 30
             periodSeconds: 10

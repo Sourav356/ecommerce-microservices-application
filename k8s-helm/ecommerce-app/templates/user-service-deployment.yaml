@@ -1,5 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
+
+{{- $svc := index .Values "user-service" -}}
+
 metadata:
   name: user-service
   namespace: {{.Values.namespace}}
@@ -7,7 +10,7 @@ metadata:
     app: user-service
 
 spec:
-  replicas: {{.Values.user-service.replicaCount}}
+  replicas: {{ $svc.replicaCount }}
   selector:
     matchLabels:
       app: user-service
@@ -20,9 +23,9 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: "{{.Values.user-service.image.repository}}:{{.Values.user-service.image.tag}}"
+          image: "{{ $svc.image.repository }}:{{ $svc.image.tag }}"
           ports:
-            - containerPort: {{.Values.user-service.service.port}}
+            - containerPort: {{ $svc.service.port }}
 
           env:
 
@@ -65,7 +68,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: {{.Values.user-service.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 10
             periodSeconds: 5
@@ -73,7 +76,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: {{.Values.user-service.service.port}}
+              port: {{ $svc.service.port }}
 
             initialDelaySeconds: 30
             periodSeconds: 10
