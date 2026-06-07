@@ -1,4 +1,4 @@
-namespace: ecommerce
+namespace: ecommerce-apps
 api-gateway:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/api-gateway"
