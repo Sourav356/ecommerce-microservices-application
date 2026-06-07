@@ -37,7 +37,7 @@ cart-service:
 inventory-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/inventory-service"
-    tag: "latest"
+    tag: "0ae37e00d47e09800d952d50550b5131e5d9950d"
   replicaCount: 2
   service:
     port: 4005
