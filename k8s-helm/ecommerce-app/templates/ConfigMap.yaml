@@ -7,9 +7,14 @@ metadata:
   namespace: {{ .Values.namespace }}
 
 data:
-  DB_HOST: "postgres"
+  
+  DB_HOST: "ecommerce-rds.cl6a484mm0ld.ap-south-2.rds.amazonaws.com"
+  POSTGRES_HOST: "ecommerce-rds.cl6a484mm0ld.ap-south-2.rds.amazonaws.com"
+
 
   DB_PORT: "5432"
+
+  PGSSLMODE: "require"
 
   DB_USER: "postgres"
 
