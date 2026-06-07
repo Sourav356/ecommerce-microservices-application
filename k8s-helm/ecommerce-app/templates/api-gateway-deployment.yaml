@@ -1,7 +1,6 @@
+{{- $svc := index .Values "api-gateway" -}}
 apiVersion: apps/v1
 kind: Deployment
-
-{{- $svc := index .Values "api-gateway" -}}
 
 metadata:
   name: api-gateway

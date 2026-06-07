@@ -1,7 +1,6 @@
+{{- $svc := index .Values "frontend" -}}
 apiVersion: v1
 kind: Service
-
-{{- $svc := index .Values "frontend" -}}
 
 metadata:
   name: frontend-ec

@@ -1,7 +1,6 @@
+{{- $svc := index .Values "user-service" -}}
 apiVersion: apps/v1
 kind: Deployment
-
-{{- $svc := index .Values "user-service" -}}
 
 metadata:
   name: user-service

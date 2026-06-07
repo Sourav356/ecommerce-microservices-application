@@ -1,7 +1,6 @@
+{{- $svc := index .Values "product-service" -}}
 apiVersion: v1
 kind: Service
-
-{{- $svc := index .Values "product-service" -}}
 
 metadata:
   name: product-service

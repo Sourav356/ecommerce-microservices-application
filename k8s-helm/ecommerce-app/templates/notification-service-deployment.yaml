@@ -1,7 +1,7 @@
+{{- $svc := index .Values "notification-service" -}}
 apiVersion: apps/v1
 kind: Deployment
 
-{{- $svc := index .Values "notification-service" -}}
 
 metadata:
   name: notification-service
