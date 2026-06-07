@@ -58,7 +58,7 @@ payment-service:
 notification-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/notification-service"
-    tag: "latest"
+    tag: "b5f6076ec7046d4f6598241332f565e91bf7716b"
   replicaCount: 2
   service:
     port: 4008
