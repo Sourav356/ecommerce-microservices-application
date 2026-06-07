@@ -1,56 +1,55 @@
 name: GitOps Manifest Update
 
 on:
-repository_dispatch:
-types: [gitops-update]
+  repository_dispatch:
+    types: [gitops-update]
 
 concurrency:
-group: gitops-update
-cancel-in-progress: false
+  group: gitops-update
+  cancel-in-progress: false
 
 permissions:
-contents: write
+  contents: write
 
 jobs:
-update-manifest:
-runs-on: ubuntu-latest
+  update-manifest:
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-steps:
-  - name: Checkout repository
-    uses: actions/checkout@v4
-    with:
-      fetch-depth: 0
+      - name: Update values.yaml
+        uses: mikefarah/yq@master
+        with:
+          cmd: >
+            yq -i
+            '.["${{ github.event.client_payload.service_name }}"].image.tag =
+            "${{ github.event.client_payload.image_tag }}"'
+            ./k8s-helm/ecommerce-app/values.yaml
 
-  - name: Update values.yaml
-    uses: mikefarah/yq@master
-    with:
-      cmd: >
-        yq -i
-        '.["${{ github.event.client_payload.service_name }}"].image.tag =
-        "${{ github.event.client_payload.image_tag }}"'
-        ./k8s-helm/ecommerce-app/values.yaml
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-  - name: Commit changes
-    run: |
-      git config user.name "github-actions[bot]"
-      git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s-helm/ecommerce-app/values.yaml
 
-      git add k8s-helm/ecommerce-app/values.yaml
+          git diff --cached --quiet && exit 0
 
-      git diff --cached --quiet && exit 0
+          git commit -m "chore(gitops): update ${{ github.event.client_payload.service_name }} image tag to ${{ github.event.client_payload.image_tag }}"
 
-      git commit -m "chore(gitops): update ${{ github.event.client_payload.service_name }} image tag to ${{ github.event.client_payload.image_tag }}"
+      - name: Push with rebase retry
+        run: |
+          for i in 1 2 3; do
+            git pull --rebase origin main && \
+            git push origin main && exit 0
 
-  - name: Push with rebase retry
-    run: |
-      for i in 1 2 3; do
-        git pull --rebase origin main && \
-        git push origin main && exit 0
+            echo "Push failed. Retrying..."
+            sleep 5
+          done
 
-        echo "Push failed. Retrying..."
-        sleep 5
-      done
-
-      echo "Failed to push after 3 attempts"
-      exit 1
+          echo "Failed to push after 3 attempts"
+          exit 1
