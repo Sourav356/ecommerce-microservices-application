@@ -30,7 +30,7 @@ product-service:
 cart-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/cart-service"
-    tag: "latest"
+    tag: "cd6d85382600b36c2c6a00ca87db106ffe8d9936"
   replicaCount: 2
   service:
     port: 4004
