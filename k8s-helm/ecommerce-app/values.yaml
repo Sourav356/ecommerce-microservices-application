@@ -2,7 +2,7 @@ namespace: ecommerce-apps
 api-gateway:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/api-gateway"
-    tag: "latest"
+    tag: "0ae37e00d47e09800d952d50550b5131e5d9950d"
   replicaCount: 2
   service:
     port: 4000
@@ -16,14 +16,14 @@ frontend:
 user-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/user-service"
-    tag: "latest"
+    tag: "0ae37e00d47e09800d952d50550b5131e5d9950d"
   replicaCount: 2
   service:
     port: 4001
 product-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/product-service"
-    tag: "latest"
+    tag: "0ae37e00d47e09800d952d50550b5131e5d9950d"
   replicaCount: 2
   service:
     port: 4003
@@ -37,14 +37,14 @@ cart-service:
 inventory-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/inventory-service"
-    tag: "latest"
+    tag: "0ae37e00d47e09800d952d50550b5131e5d9950d"
   replicaCount: 2
   service:
     port: 4005
 order-service:
   image:
     repository: "637043415174.dkr.ecr.ap-south-2.amazonaws.com/order-service"
-    tag: "latest"
+    tag: "0ae37e00d47e09800d952d50550b5131e5d9950d"
   replicaCount: 2
   service:
     port: 4006
