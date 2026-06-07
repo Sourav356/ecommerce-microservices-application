@@ -1,25 +1,20 @@
 {{- $svc := index .Values "review-service" -}}
 apiVersion: apps/v1
 kind: Deployment
-
-
 metadata:
   name: review-service
   namespace: {{.Values.namespace}}
   labels:
     app: review-service
-
 spec:
   replicas: {{ $svc.replicaCount }}
   selector:
     matchLabels:
       app: review-service
-
   template:
     metadata:
       labels:
         app: review-service
-
     spec:
       containers:
         - name: review-service
@@ -27,31 +22,14 @@ spec:
           ports:
             - containerPort: {{ $svc.service.port }}
 
+          # Highlight-start
+          # Loads all variables from the ConfigMap automatically (including PGSSLMODE)
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+          # Highlight-end
+
           env:
-            - name: DB_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: ecommerce-config
-                  key: DB_HOST
-
-            - name: DB_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: ecommerce-config
-                  key: DB_PORT
-
-            - name: DB_USER
-              valueFrom:
-                configMapKeyRef:
-                  name: ecommerce-config
-                  key: DB_USER
-
-            - name: DB_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: ecommerce-config
-                  key: DB_NAME
-
             - name: DB_PASS
               valueFrom:
                 secretKeyRef:
@@ -62,23 +40,18 @@ spec:
             httpGet:
               path: /health
               port: {{ $svc.service.port }}
-
             initialDelaySeconds: 10
             periodSeconds: 5
-
           livenessProbe:
             httpGet:
               path: /health
               port: {{ $svc.service.port }}
-
             initialDelaySeconds: 30
             periodSeconds: 10
-
           resources:
             requests:
               memory: "128Mi"
               cpu: "100m"
-
             limits:
               memory: "256Mi"
               cpu: "200m"

@@ -1,31 +1,33 @@
 {{- $svc := index .Values "payment-service" -}}
 apiVersion: apps/v1
 kind: Deployment
-
-
 metadata:
   name: payment-service
   namespace: {{.Values.namespace}}
   labels:
     app: payment-service
-
 spec:
   replicas: {{ $svc.replicaCount }}
   selector:
     matchLabels:
       app: payment-service
-
   template:
     metadata:
       labels:
         app: payment-service
-
     spec:
       containers:
         - name: payment-service
           image: "{{ $svc.image.repository }}:{{ $svc.image.tag }}"
           ports:
             - containerPort: {{ $svc.service.port }}
+          
+          # Highlight-start
+          # Automatically injects DB_HOST, DB_PORT, and PGSSLMODE from your ConfigMap
+          envFrom:
+            - configMapRef:
+                name: ecommerce-config
+          # Highlight-end
 
           env:
             - name: DB_URL
@@ -38,23 +40,18 @@ spec:
             httpGet:
               path: /health
               port: {{ $svc.service.port }}
-
             initialDelaySeconds: 10
             periodSeconds: 5
-
           livenessProbe:
             httpGet:
               path: /health
               port: {{ $svc.service.port }}
-
             initialDelaySeconds: 30
             periodSeconds: 10
-
           resources:
             requests:
               memory: "128Mi"
               cpu: "100m"
-
             limits:
               memory: "256Mi"
               cpu: "200m"
